@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+<div th:replace="fragments/navigation :: navbar"></div>
+<div th:replace="fragments/navigation :: alerts"></div>
+<div class="container mt-4 min-vh-100">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2><i class="bi bi-file-text"></i> 文档列表</h2>
+            </div>
+            <div class="col-md-4 text-end">
+                <a th:href="@{/documents/create}" class="btn btn-primary" sec:authorize="isAuthenticated()">
+                    <i class="bi bi-plus-circle"></i> 新建文档
+                </a>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <form th:action="@{/documents}" method="get" class="d-flex">
+                    <input type="text" name="keyword" class="form-control me-2"
+                           placeholder="搜索文档标题..." th:value="${keyword}">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-search"></i> 搜索
+                    </button>
+                    <a th:href="@{/documents}" class="btn btn-outline-secondary ms-2">
+                        <i class="bi bi-x-circle"></i> 清除
+                    </a>
+                </form>
+            </div>
+        </div>
+
+        <div class="row mb-4" sec:authorize="isAuthenticated()">
+            <div class="col-12">
+                <div class="btn-group" role="group">
+                    <a th:href="@{/documents/my}" class="btn btn-outline-info">
+                        <i class="bi bi-person"></i> 我的文档
+                    </a>
+                    <a th:href="@{/documents/public}" class="btn btn-outline-success">
+                        <i class="bi bi-globe"></i> 公开文档
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${param.error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div th:if="${documents == null or documents.empty}" class="text-center py-5">
+                            <i class="bi bi-inbox display-1 text-muted"></i>
+                            <p class="text-muted mt-3">暂无文档</p>
+                            <a th:href="@{/documents/create}" class="btn btn-primary" sec:authorize="isAuthenticated()">
+                                创建第一个文档
+                            </a>
+                        </div>
+
+                        <div th:if="${documents != null and not documents.empty}">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>标题</th>
+                                            <th>作者</th>
+                                            <th>分类</th>
+                                            <th>状态</th>
+                                            <th>创建时间</th>
+                                            <th>操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="document : ${documents.content}">
+                                            <td>
+                                                <a th:href="@{/documents/view/{id}(id=${document.id})}"
+                                                   class="text-decoration-none" th:text="${document.title}">
+                                                    文档标题
+                                                </a>
+                                                <div th:if="${document.description}" class="text-muted small"
+                                                     th:text="${document.description}"></div>
+                                            </td>
+                                            <td th:text="${document.user.fullName}">作者</td>
+                                            <td>
+                                                <span th:if="${document.category}" class="badge bg-info"
+                                                      th:text="${document.category}">分类</span>
+                                                <span th:unless="${document.category}" class="text-muted">-</span>
+                                            </td>
+                                            <td>
+                                                <span th:if="${document.isPublic}" class="badge bg-success">公开</span>
+                                                <span th:unless="${document.isPublic}" class="badge bg-secondary">私有</span>
+                                            </td>
+                                            <td th:text="${#temporals.format(document.createdAt, 'yyyy-MM-dd HH:mm')}">时间</td>
+                                            <td>
+                                                <div class="d-flex gap-2">
+                                                    <a th:href="@{/documents/view/{id}(id=${document.id})}"
+                                                       class="btn btn-sm btn-outline-primary" title="查看">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                    <a th:if="${#authorization.expression('hasRole(''ADMIN'')') or #authentication.name == document.user.username}"
+                                                       th:href="@{/documents/edit/{id}(id=${document.id})}"
+                                                       class="btn btn-sm btn-outline-warning" title="编辑">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <form th:if="${#authorization.expression('hasRole(''ADMIN'')') or #authentication.name == document.user.username}"
+                                                          th:action="@{/documents/delete/{id}(id=${document.id})}"
+                                                          method="post" class="d-inline"
+                                                          onsubmit="return confirm('确定要删除这个文档吗？')">
+                                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="删除">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <nav aria-label="文档分页" th:if="${documents.totalPages > 1}">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item" th:class="${currentPage == 0} ? 'disabled' : ''">
+                                        <a class="page-link" th:href="@{/documents(page=0, keyword=${keyword})}">首页</a>
+                                    </li>
+                                    <li class="page-item" th:class="${currentPage == 0} ? 'disabled' : ''">
+                                        <a class="page-link" th:href="@{/documents(page=${currentPage - 1}, keyword=${keyword})}">上一页</a>
+                                    </li>
+                                    <li th:each="i : ${#numbers.sequence(0, documents.totalPages - 1)}"
+                                        class="page-item" th:class="${i == currentPage} ? 'active' : ''">
+                                        <a class="page-link" th:href="@{/documents(page=${i}, keyword=${keyword})}"
+                                           th:text="${i + 1}">页码</a>
+                                    </li>
+                                    <li class="page-item" th:class="${currentPage == documents.totalPages - 1} ? 'disabled' : ''">
+                                        <a class="page-link" th:href="@{/documents(page=${currentPage + 1}, keyword=${keyword})}">下一页</a>
+                                    </li>
+                                    <li class="page-item" th:class="${currentPage == documents.totalPages - 1} ? 'disabled' : ''">
+                                        <a class="page-link" th:href="@{/documents(page=${documents.totalPages - 1}, keyword=${keyword})}">末页</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div th:replace="fragments/navigation :: footer"></div>
+<div th:replace="fragments/navigation :: scripts"></div>
+</body>
+</html>

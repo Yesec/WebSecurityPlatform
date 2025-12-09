@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+    <div th:replace="fragments/navigation :: navbar"></div>
+    <div th:replace="fragments/navigation :: alerts"></div>
+
+    <div class="container mt-4 min-vh-100">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2>
+                            <i class="bi bi-folder"></i>
+                            <span th:text="${selectedCategory}">分类名称</span> 分类文档
+                        </h2>
+                        <p class="text-muted mb-0">共找到 <span th:text="${#lists.size(documents)}">0</span> 个文档</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/documents/public}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> 返回
+                        </a>
+                        <a th:href="@{/documents/create}" class="btn btn-primary" sec:authorize="isAuthenticated()">
+                            <i class="bi bi-plus-circle"></i> 新建文档
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title"><i class="bi bi-funnel"></i> 分类筛选</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a th:href="@{/documents/category/{category}(category=${category})}"
+                               th:each="category : ${categories}"
+                               th:class="${category == selectedCategory} ? 'btn btn-primary' : 'btn btn-outline-primary'"
+                               th:text="${category}">
+                                分类名称
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4" th:if="${tags}">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="card-title"><i class="bi bi-tags"></i> 标签筛选</h6>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a th:href="@{/documents/tag/{tag}(tag=${tag})}"
+                               th:each="tag : ${tags}"
+                               class="btn btn-outline-secondary btn-sm"
+                               th:text="${tag}">
+                                标签
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div th:if="${#lists.isEmpty(documents)}" class="col-12">
+                <div class="text-center py-5">
+                    <i class="bi bi-folder-x display-1 text-muted"></i>
+                    <h4 class="mt-3 text-muted">该分类下暂无文档</h4>
+                    <p class="text-muted">试试查看其他分类，或者创建新文档</p>
+                    <a th:href="@{/documents/create}" class="btn btn-primary" sec:authorize="isAuthenticated()">
+                        <i class="bi bi-plus-circle"></i> 创建文档
+                    </a>
+                </div>
+            </div>
+
+            <div th:each="document : ${documents}" class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 animate-fade-in-up">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-2">
+                            <h5 class="card-title">
+                                <a th:href="@{/documents/view/{id}(id=${document.id})}"
+                                   class="text-decoration-none text-primary"
+                                   th:text="${#strings.abbreviate(document.title, 30)}">
+                                    文档标题
+                                </a>
+                            </h5>
+                            <p class="card-text text-muted small mb-2"
+                               th:text="${#strings.abbreviate(document.description ?: '暂无描述', 50)}">
+                                文档描述
+                            </p>
+                        </div>
+
+                        <div class="mb-auto">
+                            <div th:if="${document.tags}" class="mb-2">
+                                <span th:each="tag : ${#strings.arraySplit(document.tags, ',')}"
+                                      th:if="${tag}"
+                                      class="badge bg-light text-dark me-1 mb-1"
+                                      th:text="${#strings.trim(tag)}">标签</span>
+                            </div>
+
+                            <div th:if="${document.category}" class="mb-2">
+                                <span class="badge bg-primary" th:text="${document.category}">分类</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="small text-muted">
+                                <i class="bi bi-person"></i>
+                                <span th:text="${document.user.fullName}">作者</span>
+                                <span class="ms-2">
+                                    <i class="bi bi-calendar"></i>
+                                    <span th:text="${#dates.format(document.createdAt, 'MM-dd')}">日期</span>
+                                </span>
+                            </div>
+                            <div class="small text-muted">
+                                <i class="bi bi-eye"></i>
+                                <span th:text="${document.viewCount ?: 0}">0</span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div>
+                                <span th:if="${document.isPublic}" class="badge bg-success">
+                                    <i class="bi bi-unlock"></i> 公开
+                                </span>
+                                <span th:unless="${document.isPublic}" class="badge bg-secondary">
+                                    <i class="bi bi-lock"></i> 私有
+                                </span>
+                            </div>
+                            <a th:href="@{/documents/view/{id}(id=${document.id})}"
+                               class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> 查看
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12 text-center">
+                <a href="#" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-up"></i> 返回顶部
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/navigation :: footer"></div>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

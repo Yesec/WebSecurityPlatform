@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+    <div th:replace="fragments/navigation :: navbar"></div>
+    <div th:replace="fragments/navigation :: alerts"></div>
+    
+    <div class="container mt-4 min-vh-100">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-user-circle fa-5x text-primary"></i>
+                        </div>
+                        <h5 th:text="${user.fullName} ?: ${user.username}">用户名</h5>
+                        <p class="text-muted" th:text="${user.role}">角色</p>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6>快捷操作</h6>
+                        <div class="d-grid gap-2">
+                            <a th:href="@{/user/edit}" class="btn btn-outline-primary btn-sm">编辑资料</a>
+                            <a th:href="@{/user/change-password}" class="btn btn-outline-warning btn-sm">修改密码</a>
+                            <a th:href="@{/documents/my}" class="btn btn-outline-info btn-sm">我的文档</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">个人信息</h5>
+                        <a th:href="@{/user/edit}" class="btn btn-outline-primary btn-sm">编辑</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>用户名:</strong></div>
+                            <div class="col-md-9"><span th:text="${user.username}">username</span></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>邮箱:</strong></div>
+                            <div class="col-md-9"><span th:text="${user.email}">email</span></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>姓名:</strong></div>
+                            <div class="col-md-9"><span th:text="${user.fullName ?: '未设置'}">full name</span></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>角色:</strong></div>
+                            <div class="col-md-9">
+                                <span class="badge bg-primary" th:if="${user.role == 'ADMIN'}">管理员</span>
+                                <span class="badge bg-info" th:if="${user.role == 'USER'}">普通用户</span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>账户状态:</strong></div>
+                            <div class="col-md-9">
+                                <span class="badge bg-success" th:if="${user.isActive}">正常</span>
+                                <span class="badge bg-danger" th:unless="${user.isActive}">已禁用</span>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>注册时间:</strong></div>
+                            <div class="col-md-9"><span th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}">created at</span></div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-3"><strong>最后登录:</strong></div>
+                            <div class="col-md-9"><span th:text="${user.lastLoginAt != null ? #temporals.format(user.lastLoginAt, 'yyyy-MM-dd HH:mm') : '从未登录'}">last login</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">使用统计</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <h3 class="text-primary" th:text="${user.documents != null ? user.documents.size() : 0}">0</h3>
+                                <p class="text-muted">文档数量</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h3 class="text-success" th:text="${user.operationLogs != null ? user.operationLogs.size() : 0}">0</h3>
+                                <p class="text-muted">操作记录</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h3 class="text-info">
+                                    <span th:text="${T(java.time.temporal.ChronoUnit).DAYS.between(user.createdAt, T(java.time.LocalDateTime).now())}">0</span>
+                                </h3>
+                                <p class="text-muted">注册天数</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/navigation :: footer"></div>
+    <div th:replace="fragments/navigation :: scripts"></div>
+</body>
+</html>

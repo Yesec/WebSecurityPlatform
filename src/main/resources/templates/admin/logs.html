@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+    <div th:replace="fragments/navigation :: navbar"></div>
+    <div th:replace="fragments/navigation :: alerts"></div>
+    
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/dashboard">
+                                <i class="bi bi-speedometer2"></i> 控制台
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="bi bi-people"></i> 用户管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/documents">
+                                <i class="bi bi-file-earmark-text"></i> 文档管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/admin/logs">
+                                <i class="bi bi-clock-history"></i> 操作日志
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/system">
+                                <i class="bi bi-gear"></i> 系统设置
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">操作日志</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
+                                <i class="bi bi-arrow-clockwise"></i> 刷新
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="exportLogs()">
+                                <i class="bi bi-download"></i> 导出
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" name="username" placeholder="用户名" th:value="${param.username}">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" name="operationType">
+                                    <option value="">所有操作类型</option>
+                                    <option value="用户注册" th:selected="${param.operationType == '用户注册'}">用户注册</option>
+                                    <option value="用户登录" th:selected="${param.operationType == '用户登录'}">用户登录</option>
+                                    <option value="用户信息更新" th:selected="${param.operationType == '用户信息更新'}">用户信息更新</option>
+                                    <option value="用户删除" th:selected="${param.operationType == '用户删除'}">用户删除</option>
+                                    <option value="密码修改" th:selected="${param.operationType == '密码修改'}">密码修改</option>
+                                    <option value="文档创建" th:selected="${param.operationType == '文档创建'}">文档创建</option>
+                                    <option value="文档更新" th:selected="${param.operationType == '文档更新'}">文档更新</option>
+                                    <option value="文档删除" th:selected="${param.operationType == '文档删除'}">文档删除</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="date" class="form-control" name="startDate" th:value="${param.startDate}">
+                            </div>
+                            <div class="col-md-2">
+                                <input type="date" class="form-control" name="endDate" th:value="${param.endDate}">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> 搜索
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            今日操作
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${todayOperations}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="bi bi-calendar-day fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            本周操作
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${weekOperations}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="bi bi-calendar-week fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-info shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                            总日志数
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalLogs}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="bi bi-list-ul fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                            活跃用户
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${activeUsers}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="bi bi-people fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">操作日志列表</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>时间</th>
+                                        <th>用户</th>
+                                        <th>操作类型</th>
+                                        <th>操作详情</th>
+                                        <th>IP地址</th>
+                                        <th>用户代理</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="log : ${logs}">
+                                        <td th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}">-</td>
+                                        <td th:text="${log.user.username}">-</td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${log.operationType == '用户删除' or log.operationType == '文档删除'} ? 'bg-danger' : 
+                                                                  (${log.operationType == '用户注册' or log.operationType == '文档创建'} ? 'bg-success' : 'bg-primary')"
+                                                  th:text="${log.operationType}">-</span>
+                                        </td>
+                                        <td th:text="${log.operationDetail ?: '-'}">-</td>
+                                        <td th:text="${log.ipAddress ?: '-'}">-</td>
+                                        <td th:text="${log.userAgent != null ? #strings.substring(log.userAgent, 0, 50) + '...' : '-'}">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <nav aria-label="日志列表分页" th:if="${totalPages > 1}">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:class="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/logs(page=${currentPage - 1}, username=${param.username}, operationType=${param.operationType}, startDate=${param.startDate}, endDate=${param.endDate})}">上一页</a>
+                                </li>
+                                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                                    class="page-item" 
+                                    th:class="${i == currentPage} ? 'active'">
+                                    <a class="page-link" th:href="@{/admin/logs(page=${i}, username=${param.username}, operationType=${param.operationType}, startDate=${param.startDate}, endDate=${param.endDate})}" th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:class="${currentPage == totalPages - 1} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/logs(page=${currentPage + 1}, username=${param.username}, operationType=${param.operationType}, startDate=${param.startDate}, endDate=${param.endDate})}">下一页</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script src="/js/navbar-enhancements.js"></script>
+    <script>
+        function exportLogs() {
+            const params = new URLSearchParams(window.location.search);
+            
+            let exportUrl = '/admin/logs/export?';
+            if (params.toString()) {
+                exportUrl += params.toString();
+            }
+            
+            const link = document.createElement('a');
+            link.href = exportUrl;
+            link.download = '操作日志_' + new Date().toISOString().split('T')[0] + '.csv';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        let autoRefresh = false;
+        let refreshInterval;
+
+        function toggleAutoRefresh() {
+            autoRefresh = !autoRefresh;
+            if (autoRefresh) {
+                refreshInterval = setInterval(() => {
+                    location.reload();
+                }, 30000); 
+            } else {
+                clearInterval(refreshInterval);
+            }
+        }
+    </script>
+</body>
+</html>

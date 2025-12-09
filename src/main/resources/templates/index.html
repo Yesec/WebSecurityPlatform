@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+<div th:replace="fragments/navigation :: navbar"></div>
+
+<div th:replace="fragments/navigation :: alerts"></div>
+
+<div class="hero-section py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <h1 class="display-4 animate-fade-in">DocuHub 企业文档管理系统</h1>
+                <p class="lead animate-fade-in-up" style="animation-delay: 0.2s;">安全高效的文档协作平台，助力企业数字化转型</p>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mt-4">
+            <div class="col-lg-10">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="card h-100 animate-fade-in-up hover-scale" style="animation-delay: 0.3s;">
+                            <div class="card-body d-flex flex-column">
+                                <div class="feature-icon mb-3">
+                                    <i class="bi bi-people-fill text-primary"></i>
+                                </div>
+                                <h5 class="card-title">用户管理</h5>
+                                <p class="card-text flex-grow-1">完整的用户认证和授权系统，包括注册、登录、权限管理等功能。</p>
+                                <div class="mt-auto">
+                                    <a th:href="@{/user/register}" class="btn btn-primary w-100" sec:authorize="!isAuthenticated()">
+                                        <i class="bi bi-person-plus"></i> 立即注册
+                                    </a>
+                                    <a th:href="@{/documents/my}" class="btn btn-primary w-100" sec:authorize="isAuthenticated()">
+                                        <i class="bi bi-journal-text"></i> 我的文档
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 animate-fade-in-up hover-scale" style="animation-delay: 0.4s;">
+                            <div class="card-body d-flex flex-column">
+                                <div class="feature-icon mb-3">
+                                    <i class="bi bi-journal-text text-success"></i>
+                                </div>
+                                <h5 class="card-title">文档管理</h5>
+                                <p class="card-text flex-grow-1">支持文档的创建、编辑、删除和分享，具备完整的权限控制机制。</p>
+                                <div class="mt-auto">
+                                    <a th:href="@{/documents/public}" class="btn btn-outline-primary w-100" sec:authorize="!isAuthenticated()">
+                                        <i class="bi bi-globe"></i> 浏览公开文档
+                                    </a>
+                                    <a th:href="@{/documents}" class="btn btn-success w-100" sec:authorize="isAuthenticated()">
+                                        <i class="bi bi-journal-text"></i> 文档管理
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card h-100 animate-fade-in-up hover-scale" style="animation-delay: 0.5s;">
+                            <div class="card-body d-flex flex-column">
+                                <div class="feature-icon mb-3">
+                                    <i class="bi bi-shield-check text-warning"></i>
+                                </div>
+                                <h5 class="card-title">安全可靠</h5>
+                                <p class="card-text flex-grow-1">企业级安全防护，数据加密传输存储，确保文档信息安全。</p>
+                                <div class="mt-auto">
+                                    <button class="btn btn-warning w-100" data-bs-toggle="modal" data-bs-target="#securityModal">
+                                        <i class="bi bi-shield-lock"></i> 了解更多
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="features-section py-5 bg-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="text-center mb-4">平台特性</h2>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="text-center">
+                    <i class="bi bi-cloud-upload display-4 text-primary mb-3"></i>
+                    <h5>云端存储</h5>
+                    <p class="text-muted">文档云端存储，随时随地访问，支持多设备同步</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="text-center">
+                    <i class="bi bi-search display-4 text-success mb-3"></i>
+                    <h5>智能搜索</h5>
+                    <p class="text-muted">全文搜索功能，快速定位所需文档内容</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="text-center">
+                    <i class="bi bi-people display-4 text-info mb-3"></i>
+                    <h5>团队协作</h5>
+                    <p class="text-muted">支持多人协作编辑，实时同步更新</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="securityModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">安全特性</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <ul class="list-unstyled">
+                    <li class="mb-3">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>数据加密：</strong>采用AES-256加密算法保护数据安全
+                    </li>
+                    <li class="mb-3">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>访问控制：</strong>基于角色的权限管理，精确控制访问权限
+                    </li>
+                    <li class="mb-3">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>安全审计：</strong>完整的操作日志记录，支持安全审计
+                    </li>
+                    <li class="mb-3">
+                        <i class="bi bi-check-circle-fill text-success me-2"></i>
+                        <strong>备份恢复：</strong>自动备份机制，确保数据不丢失
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                <a th:href="@{/user/register}" class="btn btn-primary" sec:authorize="!isAuthenticated()">立即开始</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="fragments/navigation :: footer"></div>
+<div th:replace="fragments/navigation :: scripts"></div>
+</body>
+</html>

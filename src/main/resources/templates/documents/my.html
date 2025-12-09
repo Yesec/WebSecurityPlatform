@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+    <div th:replace="fragments/navigation :: navbar"></div>
+    <div th:replace="fragments/navigation :: alerts"></div>
+
+    <div class="container mt-4 min-vh-100">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2><i class="bi bi-file-person"></i> 我的文档</h2>
+                <p class="text-muted" th:text="'共找到 ' + ${documents?.size() ?: 0} + ' 个文档'">文档数量</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a th:href="@{/documents/create}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> 新建文档
+                </a>
+                <a th:href="@{/documents/upload}" class="btn btn-success ms-2">
+                    <i class="bi bi-cloud-upload"></i> 上传文档
+                </a>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 th:text="${documents?.size() ?: 0}">0</h4>
+                                <p class="mb-0">总文档数</p>
+                            </div>
+                            <div>
+                                <i class="bi bi-file-text display-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 th:text="${#lists.size(documents.?[isPublic == true])}">0</h4>
+                                <p class="mb-0">公开文档</p>
+                            </div>
+                            <div>
+                                <i class="bi bi-globe display-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 th:text="${#lists.size(documents.?[isPublic == false])}">0</h4>
+                                <p class="mb-0">私有文档</p>
+                            </div>
+                            <div>
+                                <i class="bi bi-lock display-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 th:text="${#lists.size(documents.?[category != null])}">0</h4>
+                                <p class="mb-0">已分类文档</p>
+                            </div>
+                            <div>
+                                <i class="bi bi-tags display-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div th:if="${documents == null or documents.empty}" class="text-center py-5">
+                            <i class="bi bi-inbox display-1 text-muted"></i>
+                            <p class="text-muted mt-3">您还没有创建任何文档</p>
+                            <a th:href="@{/documents/create}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> 创建第一个文档
+                            </a>
+                        </div>
+
+                        <div th:if="${documents != null and not documents.empty}">
+                            <div class="row">
+                                <div th:each="document : ${documents}" class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 document-card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h6 class="card-title mb-0" th:text="${document.title}">文档标题</h6>
+                                            <div>
+                                                <span th:if="${document.isPublic}" class="badge bg-success">公开</span>
+                                                <span th:unless="${document.isPublic}" class="badge bg-secondary">私有</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div th:if="${document.description}" class="text-muted small mb-2"
+                                                 th:text="${document.description}">文档描述</div>
+
+                                            <div th:if="${document.category}" class="mb-2">
+                                                <span class="badge bg-info" th:text="${document.category}">分类</span>
+                                            </div>
+
+                                            <div th:if="${document.tags}" class="mb-2">
+                                                <span th:each="tag : ${document.tagArray}" class="badge bg-light text-dark me-1"
+                                                      th:text="${tag}">标签</span>
+                                            </div>
+
+                                            <div class="text-muted small mb-2">
+                                                <i class="bi bi-clock"></i>
+                                                <span th:text="${#temporals.format(document.createdAt, 'yyyy-MM-dd HH:mm')}">创建时间</span>
+                                            </div>
+
+                                            <div class="text-muted small mb-2">
+                                                <i class="bi bi-eye"></i>
+                                                浏览 <span th:text="${document.viewCount ?: 0}">0</span> 次
+                                            </div>
+
+                                            <div th:if="${document.fileSize != null}" class="text-muted small mb-2">
+                                                <i class="bi bi-file-earmark"></i>
+                                                文件大小: <span th:text="${document.formattedFileSize}">0</span>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer bg-white border-top-0">
+                                            <div class="d-flex gap-2">
+                                                <a th:href="@{/documents/view/{id}(id=${document.id})}"
+                                                   class="btn btn-outline-primary btn-sm flex-grow-1">
+                                                    <i class="bi bi-eye"></i> 查看
+                                                </a>
+                                                <a th:href="@{/documents/edit/{id}(id=${document.id})}"
+                                                   class="btn btn-outline-secondary btn-sm flex-grow-1">
+                                                    <i class="bi bi-pencil"></i> 编辑
+                                                </a>
+                                                <form th:action="@{/documents/delete/{id}(id=${document.id})}"
+                                                      method="post" class="flex-grow-1">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100"
+                                                            onclick="return confirm('确定要删除这个文档吗？')">
+                                                        <i class="bi bi-trash"></i> 删除
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/navigation :: footer"></div>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

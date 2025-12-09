@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+<div th:replace="fragments/navigation :: navbar"></div>
+<div th:replace="fragments/navigation :: alerts"></div>
+<div class="container mt-4 min-vh-100">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/documents}">文档</a></li>
+                <li class="breadcrumb-item active" aria-current="page" th:text="${document.title}">文档标题</li>
+            </ol>
+        </nav>
+
+        <div class="card mb-4 shadow-sm border-0 animate-fade-in-up">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="mb-2">
+                            <span class="badge rounded-pill" 
+                                  th:classappend="${document.isPublic ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'}">
+                                <i th:class="${document.isPublic ? 'bi bi-unlock-fill' : 'bi bi-lock-fill'}"></i>
+                                <span th:text="${document.isPublic ? '公开' : '私有'}">权限</span>
+                            </span>
+                            <span th:if="${document.category}" class="badge bg-primary-subtle text-primary rounded-pill ms-2">
+                                <i class="bi bi-folder-fill me-1"></i><span th:text="${document.category}">分类</span>
+                            </span>
+                        </div>
+                        <h1 class="h2 fw-bold mb-3" th:text="${document.title}">文档标题</h1>
+                        <div class="d-flex flex-wrap gap-3 text-muted small">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-circle me-1"></i>
+                                <span th:text="${document.user.fullName}">作者</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                <span th:text="${#temporals.format(document.createdAt, 'yyyy-MM-dd HH:mm')}">创建时间</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-eye-fill me-1"></i>
+                                <span th:text="${document.viewCount ?: 0}">0</span> 浏览
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-download me-1"></i>
+                                <span th:text="${document.downloadCount ?: 0}">0</span> 下载
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <a th:href="@{/documents/download/{id}(id=${document.id})}" class="btn btn-primary">
+                            <i class="bi bi-download me-1"></i> 下载
+                        </a>
+                        <div class="dropdown" sec:authorize="isAuthenticated()" th:if="${isOwner or isAdmin}">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-gear-fill"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow">
+                                <li>
+                                    <a class="dropdown-item" th:href="@{/documents/edit/{id}(id=${document.id})}">
+                                        <i class="bi bi-pencil me-2"></i>编辑文档
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <button class="dropdown-item text-danger" type="button" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                        <i class="bi bi-trash me-2"></i>删除文档
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${document.description}" class="mt-4 p-3 bg-light rounded-3 border-start border-4 border-primary">
+                    <h6 class="text-primary mb-2 fw-bold"><i class="bi bi-info-circle-fill me-2"></i>简介</h6>
+                    <p class="mb-0 text-secondary" th:text="${document.description}">文档描述内容</p>
+                </div>
+
+                <div th:if="${document.tags}" class="mt-3">
+                    <i class="bi bi-tags-fill text-muted me-2"></i>
+                    <span class="badge bg-light text-dark border me-1" 
+                          th:each="tag : ${#strings.arraySplit(document.tags, ',')}"
+                          th:text="${#strings.trim(tag)}">标签</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 animate-fade-in-up" style="animation-delay: 0.1s;">
+            <div class="card-header bg-white border-bottom py-3">
+                <h5 class="mb-0 text-primary"><i class="bi bi-file-text me-2"></i>文档内容</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="document-content">
+                    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css">
+                    <div th:if="${document.content}" class="content-area">
+                        <div class="p-3 bg-light rounded border">
+                            <div id="markdownContent" th:text="${document.content}" style="display:none;"></div>
+                            <div id="renderedContent" class="markdown-body" style="min-height: 200px; background-color: transparent;"></div>
+                        </div>
+                    </div>
+                    <div th:unless="${document.content}" class="text-muted text-center py-5">
+                        <i class="bi bi-file-earmark-text display-4 text-secondary opacity-50"></i>
+                        <p class="mt-3 mb-0">该文档暂无内容</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4 animate-fade-in-up" style="animation-delay: 0.2s;" th:if="${document.category}">
+            <div class="card-header">
+                <h6><i class="bi bi-collection"></i> 相关文档</h6>
+            </div>
+            <div class="card-body">
+                <div class="row" id="relatedDocuments">
+                    <div class="col-12 text-center">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="ms-2">加载相关文档中...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">确认删除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>您确定要删除文档 <strong th:text="${document.title}">文档标题</strong> 吗？</p>
+                    <p class="text-danger"><i class="bi bi-exclamation-triangle"></i> 此操作不可恢复！</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <form th:action="@{/documents/delete/{id}(id=${document.id})}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-danger">确认删除</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+<div th:replace="fragments/navigation :: footer"></div>
+<script th:src="@{/js/marked.min.js}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const markdownContent = document.getElementById('markdownContent');
+        const renderedContent = document.getElementById('renderedContent');
+        if (markdownContent && renderedContent) {
+            if (typeof marked !== 'undefined') {
+                renderedContent.innerHTML = marked.parse(markdownContent.textContent);
+            } else {
+                console.error('Marked.js is not loaded');
+                renderedContent.innerHTML = '<div class="alert alert-warning">Markdown渲染库加载失败，显示原始内容</div>' + 
+                                          '<pre>' + markdownContent.textContent + '</pre>';
+            }
+        }
+    });
+</script>
+<div th:replace="fragments/navigation :: scripts"></div>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+<div th:replace="fragments/navigation :: navbar"></div>
+<div th:replace="fragments/navigation :: alerts"></div>
+
+<div class="container mt-4 min-vh-100">
+    <h2>公开文档</h2>
+
+    <div th:if="${documents == null or #lists.isEmpty(documents)}" class="text-center py-5">
+        <p class="text-muted">暂无公开文档</p>
+    </div>
+
+    <div th:if="${documents != null and not #lists.isEmpty(documents)}">
+        <div class="row">
+            <div th:each="document : ${documents}" class="col-md-6 col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title" th:text="${document.title}">文档标题</h5>
+                        <p class="text-muted">
+                            作者: <span th:text="${document.user.fullName}">作者</span><br>
+                            创建时间: <span th:text="${#temporals.format(document.createdAt, 'yyyy-MM-dd')}">时间</span>
+                        </p>
+                        <a th:href="@{/documents/view/{id}(id=${document.id})}" class="btn btn-primary">查看文档</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="fragments/navigation :: footer"></div>
+<div th:replace="fragments/navigation :: scripts"></div>
+</body>
+</html>

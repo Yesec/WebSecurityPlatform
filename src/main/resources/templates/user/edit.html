@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+    <div th:replace="fragments/navigation :: navbar"></div>
+    <div th:replace="fragments/navigation :: alerts"></div>
+    
+    <div class="container mt-4 min-vh-100">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h5 class="mb-0">编辑个人资料</h5>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/user/update}" method="post" th:object="${user}">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">用户名</label>
+                                <input type="text" class="form-control" id="username" th:value="*{username}" disabled>
+                                <div class="form-text">用户名不可修改</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">邮箱</label>
+                                <input type="email" class="form-control" id="email" name="email" th:value="*{email}" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">姓名</label>
+                                <input type="text" class="form-control" id="fullName" name="fullName" th:value="*{fullName}">
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">保存更改</button>
+                                <a th:href="@{/user/profile}" class="btn btn-outline-secondary">返回个人资料</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/navigation :: footer"></div>
+    <div th:replace="fragments/navigation :: scripts"></div>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:fragment="head">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${title != null ? title + ' - DocuHub' : 'DocuHub - 企业文档管理系统'}">DocuHub - 企业文档管理系统</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/css/bootstrap-icons.css}" rel="stylesheet" />
+    <link th:href="@{/css/custom.css}" rel="stylesheet" />
+</head>
+
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="bi bi-journal-text"></i> DocuHub
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="docsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" 
+                       th:classappend="${#httpServletRequest.requestURI.startsWith('/documents') ? 'active' : ''}">
+                        <i class="bi bi-journal-text"></i> 文档中心
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="docsDropdown">
+                        <li><a class="dropdown-item" th:href="@{/documents/public}">
+                            <i class="bi bi-globe"></i> 公开广场
+                        </a></li>
+                        <li sec:authorize="isAuthenticated()"><hr class="dropdown-divider"></li>
+                        <li sec:authorize="isAuthenticated()"><a class="dropdown-item" th:href="@{/documents/my}">
+                            <i class="bi bi-folder2-open"></i> 我的文档
+                        </a></li>
+                        <li sec:authorize="isAuthenticated()"><a class="dropdown-item" th:href="@{/documents}">
+                            <i class="bi bi-collection"></i> 全部文档
+                        </a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item dropdown" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                       th:classappend="${#httpServletRequest.requestURI.startsWith('/admin') ? 'active' : ''}">
+                        <i class="bi bi-gear"></i> 系统管理
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                        <li><a class="dropdown-item" th:href="@{/admin/dashboard}">
+                            <i class="bi bi-speedometer2"></i> 管理仪表板
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/users}">
+                            <i class="bi bi-people"></i> 用户管理
+                        </a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/documents}">
+                            <i class="bi bi-file-earmark-text"></i> 文档管理
+                        </a></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/logs}">
+                            <i class="bi bi-clock-history"></i> 操作日志
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" th:href="@{/admin/system}">
+                            <i class="bi bi-sliders"></i> 系统设置
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item me-2" sec:authorize="isAuthenticated()">
+                    <a class="btn btn-light text-primary fw-bold" th:href="@{/documents/create}">
+                        <i class="bi bi-plus-lg"></i> 快速创建
+                    </a>
+                </li>
+
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-outline-light" th:href="@{/login}">登录</a>
+                        <a class="btn btn-light" th:href="@{/user/register}">注册</a>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle fs-5 me-1"></i>
+                        <span sec:authentication="name" class="d-none d-md-inline"></span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><div class="dropdown-header text-muted">用户中心</div></li>
+                        <li><a class="dropdown-item" th:href="@{/user/profile}">
+                            <i class="bi bi-person"></i> 个人资料
+                        </a></li>
+                        <li><a class="dropdown-item" th:href="@{/user/change-password}">
+                            <i class="bi bi-key"></i> 修改密码
+                        </a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" th:href="@{/logout}">
+                            <i class="bi bi-box-arrow-right"></i> 退出登录
+                        </a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div th:fragment="alerts" class="container mt-3">
+    <div th:if="${message}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${message}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <span th:text="${warning}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${info}" class="alert alert-info alert-dismissible fade show" role="alert">
+        <i class="bi bi-info-circle-fill"></i>
+        <span th:text="${info}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
+
+<footer th:fragment="footer" class="site-footer">
+    <div class="container">
+        <div class="row gy-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-shield-check text-primary fs-4"></i>
+                    <h5 class="mb-0">DocuHub</h5>
+                </div>
+                <p>安全、高效、专业的企业级文档管理平台。致力于为企业提供全方位的文档存储、协作与安全保护解决方案。</p>
+            </div>
+            <div class="col-lg-2 col-md-6 offset-lg-1">
+                <h5>平台导航</h5>
+                <ul class="footer-links">
+                    <li><a th:href="@{/}"><i class="bi bi-chevron-right fs-6"></i> 首页</a></li>
+                    <li><a th:href="@{/documents/public}"><i class="bi bi-chevron-right fs-6"></i> 公开文档</a></li>
+                    <li sec:authorize="isAuthenticated()"><a th:href="@{/documents/my}"><i class="bi bi-chevron-right fs-6"></i> 我的文档</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <h5>用户服务</h5>
+                <ul class="footer-links">
+                    <li sec:authorize="!isAuthenticated()"><a th:href="@{/login}"><i class="bi bi-chevron-right fs-6"></i> 用户登录</a></li>
+                    <li sec:authorize="!isAuthenticated()"><a th:href="@{/user/register}"><i class="bi bi-chevron-right fs-6"></i> 注册账号</a></li>
+                    <li sec:authorize="isAuthenticated()"><a th:href="@{/user/profile}"><i class="bi bi-chevron-right fs-6"></i> 个人中心</a></li>
+                    <li><a href="#"><i class="bi bi-chevron-right fs-6"></i> 帮助中心</a></li>
+                </ul>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h5>联系我们</h5>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="bi bi-envelope"></i> support@docuhub.com</a></li>
+                    <li><a href="#"><i class="bi bi-telephone"></i> 400-123-4567</a></li>
+                    <li><span class="text-muted"><i class="bi bi-geo-alt"></i> 陕西省西安市长安区西安电子科技大学</span></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="text-muted">
+                &copy; 2025 DocuHub 企业文档管理系统. All rights reserved.
+            </div>
+        </div>
+    </div>
+</footer>
+
+<th:block th:fragment="scripts">
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/navbar-enhancements.js}"></script>
+    <script th:src="@{/js/dropdown-fix.js}"></script>
+    <script>
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        function confirmDelete() {
+            return confirm('确定要删除吗？此操作不可撤销。');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.NavbarEnhancements) {
+                window.NavbarEnhancements.highlightCurrentPage();
+            }
+        });
+    </script>
+</th:block>
+</html>

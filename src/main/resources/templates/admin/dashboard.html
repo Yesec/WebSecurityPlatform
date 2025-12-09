@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+    <div th:replace="fragments/navigation :: navbar"></div>
+    <div th:replace="fragments/navigation :: alerts"></div>
+    
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/admin/dashboard">
+                                <i class="bi bi-speedometer2"></i> 控制台
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="bi bi-people"></i> 用户管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/documents">
+                                <i class="bi bi-file-earmark-text"></i> 文档管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/logs">
+                                <i class="bi bi-clock-history"></i> 操作日志
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/system">
+                                <i class="bi bi-gear"></i> 系统设置
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">管理控制台</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
+                                <i class="bi bi-arrow-clockwise"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-primary shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                            总用户数
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalUsers}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="bi bi-people fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-success shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                            活跃用户
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${activeUsers}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="bi bi-person-check fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-info shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                            总文档数
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalDocuments}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="bi bi-file-earmark-text fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-3 col-md-6 mb-4">
+                        <div class="card border-left-warning shadow h-100 py-2">
+                            <div class="card-body">
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col mr-2">
+                                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                            今日操作
+                                        </div>
+                                        <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${todayOperations}">0</div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <i class="bi bi-clock-history fa-2x text-gray-300"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">最新注册用户</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th>用户名</th>
+                                                <th>邮箱</th>
+                                                <th>注册时间</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="user : ${users}" th:if="${userStat.index < 5}">
+                                                <td th:text="${user.username}">-</td>
+                                                <td th:text="${user.email}">-</td>
+                                                <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm')}">-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6 mb-4">
+                        <div class="card shadow">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">系统信息</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <p><strong>系统版本:</strong> Web Security Platform v1.0</p>
+                                        <p><strong>Java版本:</strong> <span th:text="${javaVersion}">-</span></p>
+                                        <p><strong>Spring Boot:</strong> <span th:text="${springBootVersion}">-</span></p>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <p><strong>数据库:</strong> H2 Database</p>
+                                        <p><strong>运行时间:</strong> <span th:text="${uptime}">-</span></p>
+                                        <p><strong>内存使用:</strong> <span th:text="${memoryUsage}">-</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script src="/js/navbar-enhancements.js"></script>
+</body>
+</html>

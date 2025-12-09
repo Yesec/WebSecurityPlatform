@@ -1,0 +1,34 @@
+version: '3'
+services:
+  web:
+    build: .
+    expose:
+      - "8090"
+    depends_on:
+      - db
+    restart: on-failure
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/web_security_platform?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=3c41b8da4e79459
+  
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=3c41b8da4e79459
+      - MYSQL_DATABASE=web_security_platform
+    ports:
+      - "3306:3306"
+    restart: always
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - web
+    restart: always

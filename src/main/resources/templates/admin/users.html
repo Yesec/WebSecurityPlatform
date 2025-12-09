@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+    <div th:replace="fragments/navigation :: navbar"></div>
+    <div th:replace="fragments/navigation :: alerts"></div>
+    
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/dashboard">
+                                <i class="bi bi-speedometer2"></i> 控制台
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/admin/users">
+                                <i class="bi bi-people"></i> 用户管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/documents">
+                                <i class="bi bi-file-earmark-text"></i> 文档管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/logs">
+                                <i class="bi bi-clock-history"></i> 操作日志
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/system">
+                                <i class="bi bi-gear"></i> 系统设置
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">用户管理</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="location.reload()">
+                                <i class="bi bi-arrow-clockwise"></i> 刷新
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="search" placeholder="搜索用户名或邮箱" th:value="${param.search}">
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" name="role">
+                                    <option value="">所有角色</option>
+                                    <option value="USER" th:selected="${param.role == 'USER'}">普通用户</option>
+                                    <option value="ADMIN" th:selected="${param.role == 'ADMIN'}">管理员</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" name="status">
+                                    <option value="">所有状态</option>
+                                    <option value="active" th:selected="${param.status == 'active'}">活跃</option>
+                                    <option value="inactive" th:selected="${param.status == 'inactive'}">禁用</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i> 搜索
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card shadow">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">用户列表</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-bordered" width="100%" cellspacing="0">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>用户名</th>
+                                        <th>邮箱</th>
+                                        <th>姓名</th>
+                                        <th>角色</th>
+                                        <th>状态</th>
+                                        <th>注册时间</th>
+                                        <th>最后登录</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="user : ${users}">
+                                        <td th:text="${user.id}">-</td>
+                                        <td>
+                                            <a th:href="@{'/admin/users/' + ${user.id}}" th:text="${user.username}">-</a>
+                                        </td>
+                                        <td th:text="${user.email}">-</td>
+                                        <td th:text="${user.fullName ?: '-'}">-</td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${user.role == 'ADMIN'} ? 'bg-danger' : 'bg-primary'"
+                                                  th:text="${user.role}">-</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${user.isActive} ? 'bg-success' : 'bg-secondary'"
+                                                  th:text="${user.isActive} ? '活跃' : '禁用'">-</span>
+                                        </td>
+                                        <td th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd')}">-</td>
+                                        <td th:text="${user.lastLoginAt != null ? #temporals.format(user.lastLoginAt, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a th:href="@{'/admin/users/' + ${user.id}}" class="btn btn-outline-primary" title="查看">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a th:href="@{'/admin/users/' + ${user.id} + '/edit'}" class="btn btn-outline-secondary" title="编辑">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button th:if="${user.role != 'ADMIN'}" 
+                                                        class="btn btn-outline-danger" 
+                                                        title="删除"
+                                                        th:data-id="${user.id}"
+                                                        th:data-username="${user.username}"
+                                                        onclick="confirmDelete(this.getAttribute('data-id'), this.getAttribute('data-username'))">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <nav aria-label="用户列表分页" th:if="${totalPages > 1}">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item" th:class="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/users(page=${currentPage - 1}, search=${param.search}, role=${param.role}, status=${param.status})}">上一页</a>
+                                </li>
+                                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                                    class="page-item" 
+                                    th:class="${i == currentPage} ? 'active'">
+                                    <a class="page-link" th:href="@{/admin/users(page=${i}, search=${param.search}, role=${param.role}, status=${param.status})}" th:text="${i + 1}">1</a>
+                                </li>
+                                <li class="page-item" th:class="${currentPage == totalPages - 1} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/users(page=${currentPage + 1}, search=${param.search}, role=${param.role}, status=${param.status})}">下一页</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">确认删除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>确定要删除用户 <strong id="deleteUsername"></strong> 吗？</p>
+                    <p class="text-danger">此操作将禁用该用户账户，但不会删除其创建的文档。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <form id="deleteForm" method="post" style="display: inline;">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-danger">确认删除</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script src="/js/navbar-enhancements.js"></script>
+    <script>
+        function confirmDelete(userId, username) {
+            document.getElementById('deleteUsername').textContent = username;
+            document.getElementById('deleteForm').action = '/admin/users/' + userId + '/delete';
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+</body>
+</html>

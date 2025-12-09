@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+    <div th:replace="fragments/navigation :: navbar"></div>
+    <div th:replace="fragments/navigation :: alerts"></div>
+    
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <nav class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/dashboard">
+                                <i class="bi bi-speedometer2"></i> 控制台
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/users">
+                                <i class="bi bi-people"></i> 用户管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/documents">
+                                <i class="bi bi-file-earmark-text"></i> 文档管理
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/logs">
+                                <i class="bi bi-clock-history"></i> 操作日志
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/system">
+                                <i class="bi bi-gear"></i> 系统设置
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">用户详情</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <div class="btn-group me-2">
+                            <a th:href="@{'/admin/users/' + ${user.id} + '/edit'}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i> 编辑
+                            </a>
+                            <a href="/admin/users" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> 返回列表
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-4">
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">基本信息</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center mb-3">
+                                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                                        <i class="bi bi-person"></i>
+                                    </div>
+                                </div>
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>用户ID:</strong></td>
+                                        <td th:text="${user.id}">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>用户名:</strong></td>
+                                        <td th:text="${user.username}">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>邮箱:</strong></td>
+                                        <td th:text="${user.email}">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>姓名:</strong></td>
+                                        <td th:text="${user.fullName ?: '-'}">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>角色:</strong></td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${user.role == 'ADMIN'} ? 'bg-danger' : 'bg-primary'"
+                                                  th:text="${user.role}">-</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>状态:</strong></td>
+                                        <td>
+                                            <span class="badge" 
+                                                  th:classappend="${user.isActive} ? 'bg-success' : 'bg-secondary'"
+                                                  th:text="${user.isActive} ? '活跃' : '禁用'">-</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-8">
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">详细信息</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>注册时间:</strong></p>
+                                        <p th:text="${#temporals.format(user.createdAt, 'yyyy-MM-dd HH:mm:ss')}">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>最后更新:</strong></p>
+                                        <p th:text="${#temporals.format(user.updatedAt, 'yyyy-MM-dd HH:mm:ss')}">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>最后登录:</strong></p>
+                                        <p th:text="${user.lastLoginAt != null ? #temporals.format(user.lastLoginAt, 'yyyy-MM-dd HH:mm:ss') : '从未登录'}">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>文档数量:</strong></p>
+                                        <p th:text="${user.documents != null ? user.documents.size() : 0}">0</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card shadow">
+                            <div class="card-header py-3">
+                                <h6 class="m-0 font-weight-bold text-primary">用户文档 (最近10个)</h6>
+                            </div>
+                            <div class="card-body">
+                                <div th:if="${user.documents == null or user.documents.empty}" class="text-center text-muted">
+                                    该用户暂无文档
+                                </div>
+                                <div th:if="${user.documents != null and not user.documents.empty}" class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>标题</th>
+                                                <th>分类</th>
+                                                <th>状态</th>
+                                                <th>创建时间</th>
+                                                <th>操作</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="doc : ${user.documents}" th:if="${docStat.index < 10}">
+                                                <td>
+                                                    <a th:href="@{'/documents/view/' + ${doc.id}}" th:text="${doc.title}">-</a>
+                                                </td>
+                                                <td th:text="${doc.category ?: '-'}">-</td>
+                                                <td>
+                                                    <span class="badge" 
+                                                          th:classappend="${doc.isPublic} ? 'bg-success' : 'bg-secondary'"
+                                                          th:text="${doc.isPublic} ? '公开' : '私有'">-</span>
+                                                </td>
+                                                <td th:text="${#temporals.format(doc.createdAt, 'yyyy-MM-dd')}">-</td>
+                                                <td>
+                                                    <a th:href="@{'/documents/view/' + ${doc.id}}" class="btn btn-sm btn-outline-primary" title="查看">
+                                                        <i class="bi bi-eye"></i>
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script src="/js/navbar-enhancements.js"></script>
+</body>
+</html>

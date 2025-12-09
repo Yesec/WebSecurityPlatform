@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+    <div th:replace="fragments/navigation :: navbar"></div>
+    <div th:replace="fragments/navigation :: alerts"></div>
+
+    <div class="container mt-4 min-vh-100">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card animate-fade-in-up">
+                    <div class="card-header">
+                        <h3 class="text-center"><i class="bi bi-plus-circle"></i> 创建新文档</h3>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <form th:action="@{/documents/create}" method="post" th:object="${document}">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">文档标题 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="title" th:field="*{title}"
+                                       placeholder="请输入文档标题" required>
+                                <div th:if="${#fields.hasErrors('title')}" class="text-danger small">
+                                    <span th:errors="*{title}"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">文档描述</label>
+                                <textarea class="form-control" id="description" th:field="*{description}"
+                                          rows="2" placeholder="请输入文档描述（可选）"></textarea>
+                                <div class="form-text">简短描述文档内容，最多500个字符</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="content" class="form-label">文档内容</label>
+                                <textarea class="form-control" id="content" th:field="*{content}"
+                                          rows="8" placeholder="请输入文档内容（支持Markdown格式）"></textarea>
+                                <div class="form-text">
+                                    <small>支持丰富的文本编辑，可以使用Markdown语法</small>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="category" class="form-label">分类</label>
+                                    <select class="form-select" id="category" th:field="*{category}">
+                                        <option value="">选择分类</option>
+                                        <option value="技术文档">技术文档</option>
+                                        <option value="项目文档">项目文档</option>
+                                        <option value="学习笔记">学习笔记</option>
+                                        <option value="工作文档">工作文档</option>
+                                        <option value="个人随笔">个人随笔</option>
+                                        <option value="其他">其他</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="isPublic" class="form-label">可见性</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="isPublic" th:field="*{isPublic}">
+                                        <label class="form-check-label" for="isPublic">
+                                            公开文档（其他用户可以查看）
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="tags" class="form-label">标签</label>
+                                <input type="text" class="form-control" id="tags" th:field="*{tags}"
+                                       placeholder="请输入标签，多个标签用逗号分隔">
+                                <div class="form-text">例如：Java, Spring, 数据库</div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="@{/documents/my}" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left"></i> 返回
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> 创建文档
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div th:replace="fragments/navigation :: footer"></div>
+    <div th:replace="fragments/navigation :: scripts"></div>
+
+</body>
+</html>

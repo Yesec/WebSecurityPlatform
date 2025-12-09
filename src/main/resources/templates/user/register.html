@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments/navigation :: head"></head>
+<body class="bg-light">
+<div th:replace="fragments/navigation :: navbar"></div>
+<div th:replace="fragments/navigation :: alerts"></div>
+<div class="container mt-5 min-vh-100">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card animate-fade-in-up glass-effect">
+                    <div class="card-header">
+                        <h4 class="text-center">用户注册</h4>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <span th:text="${success}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <form th:action="@{/user/register}" method="post" th:object="${user}">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">用户名 *</label>
+                                        <input type="text" class="form-control" id="username" name="username"
+                                               th:field="*{username}" required minlength="3" maxlength="50">
+                                        <div class="form-text">用户名长度为3-50个字符</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">邮箱 *</label>
+                                        <input type="email" class="form-control" id="email" name="email"
+                                               th:field="*{email}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">密码 *</label>
+                                        <input type="password" class="form-control" id="password" name="password"
+                                               th:field="*{password}" required minlength="6" maxlength="100">
+                                        <div class="form-text">密码长度至少6个字符</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="confirmPassword" class="form-label">确认密码 *</label>
+                                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">姓名</label>
+                                <input type="text" class="form-control" id="fullName" name="fullName"
+                                       th:field="*{fullName}" maxlength="100">
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">注册</button>
+                            </div>
+                        </form>
+
+                        <div class="text-center mt-3">
+                            <p>已有账户？ <a th:href="@{/login}">立即登录</a></p>
+                            <p><a href="/">返回首页</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6>注册说明</h6>
+                        <ul class="mb-0">
+                            <li>用户名必须唯一，长度为3-50个字符</li>
+                            <li>邮箱必须唯一，用于接收重要通知</li>
+                            <li>密码长度至少为6个字符</li>
+                            <li>注册成功后可直接登录使用系统</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div th:replace="fragments/navigation :: footer"></div>
+<div th:replace="fragments/navigation :: scripts"></div>
+</body>
+</html>

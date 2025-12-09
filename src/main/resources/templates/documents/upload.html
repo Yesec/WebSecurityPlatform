@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="fragments/navigation :: head"></head>
+<body>
+    <div th:replace="fragments/navigation :: navbar"></div>
+    <div th:replace="fragments/navigation :: alerts"></div>
+
+    <div class="container mt-4 min-vh-100">
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                <div class="card animate-fade-in-up">
+                    <div class="card-header">
+                        <h3 class="text-center">
+                            <i class="bi bi-cloud-upload"></i> 上传文档
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <span th:text="${error}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="bi bi-check-circle"></i>
+                            <span th:text="${success}"></span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+
+                        <form th:action="@{/documents/upload}" method="post" enctype="multipart/form-data" id="uploadForm">
+                            <div class="mb-4">
+                                <label class="form-label">选择文件 <span class="text-danger">*</span></label>
+                                <div class="upload-area border border-2 border-dashed rounded p-4 text-center"
+                                     id="uploadArea"
+                                     ondrop="handleDrop(event)"
+                                     ondragover="handleDragOver(event)"
+                                     ondragleave="handleDragLeave(event)">
+                                    <input type="file" id="fileInput" name="file" class="d-none" accept=".pdf,.doc,.docx,.txt,.md,.html,.json,.jpg,.jpeg,.png,.gif" required>
+
+                                    <div id="uploadPlaceholder">
+                                        <i class="bi bi-cloud-upload display-1 text-muted"></i>
+                                        <h5 class="mt-3 text-muted">拖拽文件到此处或点击选择</h5>
+                                        <p class="text-muted">支持 PDF、Word、文本、Markdown、图片等格式</p>
+                                        <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('fileInput').click()">
+                                            <i class="bi bi-folder2-open"></i> 选择文件
+                                        </button>
+                                    </div>
+
+                                    <div id="fileInfo" class="d-none">
+                                        <div class="d-flex align-items-center justify-content-center">
+                                            <i class="bi bi-file-earmark display-4 text-primary"></i>
+                                            <div class="ms-3 text-start">
+                                                <h6 id="fileName" class="mb-1">文件名</h6>
+                                                <small id="fileSize" class="text-muted">文件大小</small>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-danger btn-sm mt-3" onclick="clearFile()">
+                                            <i class="bi bi-trash"></i> 移除文件
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-text">最大文件大小: 10MB</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="title" class="form-label">文档标题 <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="title" name="title"
+                                       placeholder="请输入文档标题" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="description" class="form-label">文档描述</label>
+                                <textarea class="form-control" id="description" name="description"
+                                          rows="3" placeholder="请输入文档描述（可选）"></textarea>
+                                <div class="form-text">简短描述文档内容，帮助其他用户了解文档</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="category" class="form-label">分类</label>
+                                    <select class="form-select" id="category" name="category">
+                                        <option value="">选择分类</option>
+                                        <option value="技术文档">技术文档</option>
+                                        <option value="项目文档">项目文档</option>
+                                        <option value="学习笔记">学习笔记</option>
+                                        <option value="工作文档">工作文档</option>
+                                        <option value="个人随笔">个人随笔</option>
+                                        <option value="其他">其他</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="isPublic" class="form-label">可见性</label>
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="isPublic" name="isPublic" value="true">
+                                        <label class="form-check-label" for="isPublic">
+                                            公开文档（其他用户可以查看）
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="tags" class="form-label">标签</label>
+                                <input type="text" class="form-control" id="tags" name="tags"
+                                       placeholder="请输入标签，多个标签用逗号分隔">
+                                <div class="form-text">例如：Java, Spring, 数据库</div>
+                                <div class="mt-2">
+                                    <small class="text-muted">常用标签：</small>
+                                    <div class="mt-1">
+                                        <span class="badge bg-light text-dark me-1 tag-suggestion"
+                                              onclick="addTag(this)">技术文档</span>
+                                        <span class="badge bg-light text-dark me-1 tag-suggestion"
+                                              onclick="addTag(this)">项目资料</span>
+                                        <span class="badge bg-light text-dark me-1 tag-suggestion"
+                                              onclick="addTag(this)">学习笔记</span>
+                                        <span class="badge bg-light text-dark me-1 tag-suggestion"
+                                              onclick="addTag(this)">工作记录</span>
+                                        <span class="badge bg-light text-dark me-1 tag-suggestion"
+                                              onclick="addTag(this)">分享</span>
+                                        <span class="badge bg-light text-dark me-1 tag-suggestion"
+                                              onclick="addTag(this)">草稿</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="uploadProgress" class="mb-3" style="display: none;">
+                                <label class="form-label">上传进度</label>
+                                <div class="progress">
+                                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                         role="progressbar" style="width: 0%">0%</div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+                                <div>
+                                    <a th:href="@{/documents/my}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-arrow-left"></i> 返回
+                                    </a>
+                                    <a th:href="@{/documents/create}" class="btn btn-outline-info ms-2">
+                                        <i class="bi bi-plus-circle"></i> 创建文档
+                                    </a>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-primary" id="uploadBtn" disabled>
+                                        <i class="bi bi-upload"></i> 上传文档
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="bi bi-info-circle"></i> 上传指南</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>支持的文件格式</h6>
+                                <ul class="small">
+                                    <li><strong>文档:</strong> PDF, DOC, DOCX</li>
+                                    <li><strong>文本:</strong> TXT, MD (Markdown), HTML</li>
+                                    <li><strong>数据:</strong> JSON</li>
+                                    <li><strong>图片:</strong> JPG, JPEG, PNG, GIF</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>上传须知</h6>
+                                <ul class="small">
+                                    <li>单个文件最大 10MB</li>
+                                    <li>文件名不能包含特殊字符</li>
+                                    <li>文本文件会自动读取内容到文档中</li>
+                                    <li>非文本文件会生成文件信息作为文档内容</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>注意：</strong>请确保上传的文件内容符合法律法规，不要上传包含敏感信息或侵权内容的文件。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="fragments/navigation :: footer"></div>
+    <div th:replace="fragments/navigation :: scripts"></div>
+    <script>
+        let selectedFile = null;
+
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                handleFileSelect(file);
+            }
+        });
+
+        document.getElementById('uploadArea').addEventListener('click', function() {
+            document.getElementById('fileInput').click();
+        });
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('uploadArea').classList.add('border-primary', 'bg-light');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('uploadArea').classList.remove('border-primary', 'bg-light');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('uploadArea').classList.remove('border-primary', 'bg-light');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                document.getElementById('fileInput').files = files;
+                handleFileSelect(file);
+            }
+        }
+
+        function handleFileSelect(file) {
+            selectedFile = file;
+
+            const maxSize = 10 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('文件大小超过10MB限制');
+                clearFile();
+                return;
+            }
+
+            const allowedTypes = [
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'text/plain',
+                'text/markdown',
+                'text/html',
+                'application/json',
+                'image/jpeg',
+                'image/png',
+                'image/gif'
+            ];
+
+            if (!allowedTypes.includes(file.type)) {
+                alert('不支持的文件类型');
+                clearFile();
+                return;
+            }
+
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('uploadPlaceholder').classList.add('d-none');
+            document.getElementById('fileInfo').classList.remove('d-none');
+
+            const titleInput = document.getElementById('title');
+            if (!titleInput.value) {
+                titleInput.value = file.name.replace(/\.[^/.]+$/, "");
+            }
+
+            document.getElementById('uploadBtn').disabled = false;
+        }
+
+        function clearFile() {
+            selectedFile = null;
+            document.getElementById('fileInput').value = '';
+            document.getElementById('uploadPlaceholder').classList.remove('d-none');
+            document.getElementById('fileInfo').classList.add('d-none');
+            document.getElementById('uploadBtn').disabled = true;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function addTag(element) {
+            const tagText = element.textContent;
+            const tagsInput = document.getElementById('tags');
+            const currentTags = tagsInput.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+
+            if (!currentTags.includes(tagText)) {
+                currentTags.push(tagText);
+                tagsInput.value = currentTags.join(', ');
+            }
+
+            element.classList.add('bg-success', 'text-white');
+            setTimeout(() => {
+                element.classList.remove('bg-success', 'text-white');
+            }, 500);
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            if (!selectedFile) {
+                e.preventDefault();
+                alert('请先选择文件');
+                return;
+            }
+
+            document.getElementById('uploadProgress').style.display = 'block';
+            document.getElementById('uploadBtn').disabled = true;
+
+            let progress = 0;
+            const progressBar = document.getElementById('progressBar');
+            const interval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 90) {
+                    progress = 90;
+                    clearInterval(interval);
+                }
+                progressBar.style.width = progress + '%';
+                progressBar.textContent = Math.round(progress) + '%';
+            }, 500);
+        });
+    </script>
+</body>
+</html>
